@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAS SIG 3332190037</title>
+     <!--load css bootstrap-->
+     <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+		
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+     <link rel="stylesheet" href="css/style.css">
+      <!--load js bootstrap-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/main.js"></script>
+     <!--load leaflet-->  
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>  
+     <script src="js/leaflet.ajax.js"></script> 
+</head>
+<body>
+    <div class="wrapper d-flex align-items-stretch">
+        <nav id="sidebar">
+            <div class="p-4 pt-5">
+              <a href="#" class="img logo rounded-circle mb-5" style="background-image: url(images/logo2.png);"></a>
+        <ul class="list-unstyled components mb-5">
+          <li class="active">
+            <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Kab. Tangerang</a>
+            <ul class="collapse list-unstyled" id="homeSubmenu">
+            </ul>
+          </li>
+        </ul>
+
+        <div class="footer">
+        </div>
+      </div>
+    </nav>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-ajax/dist/leaflet.ajax.min.js "></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <div id="content" class="p-4 p-md-5">
+
+        <h2 class="mb-4">Sistem Informasi Geografis | 3332190037</h2>
+        <div id="map" style="width: 100%; height: 600px;"></div>
+        <script> //OSM Layer
+            var map = L.map('map').setView([-6.178471297206711, 106.47322143697454], 10);
+            var osm= L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+            });
+            osm.addTo(map);
+              //Positron Layer
+          var CartoDB_Positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+          });
+          //Google Map Layer
+          googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+          });
+          googleStreets.addTo(map);
+           //Satellite Layer
+           googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+          });
+          googleSat.addTo(map);
+
+          //add layer gjson
+          var AdmDesa_Kab_Tangerang = new L.GeoJSON.AJAX("data/AdmDesa_Kab_Tangerang.geojson",{
+            style: function(feature){
+              //random color
+              var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+              return {color: randomColor, weight: 1, fillOpacity: 0.5}
+            },
+            onEachFeature: function(feature, layer){
+              layer.bindPopup(feature.properties.NAMOBJ);
+              //add NAMOBJ to sidebar, and make it clickable and zoom in
+              var sidebar = document.getElementById('homeSubmenu');
+              var a = document.createElement('a');
+              var linkText = document.createTextNode(feature.properties.NAMOBJ);
+              a.appendChild(linkText);
+              a.title = feature.properties.NAMOBJ;
+              a.href = '#';
+              a.onclick = function(){
+                map.fitBounds(layer.getBounds());
+              }
+              sidebar.appendChild(a);
+            }
+             }).addTo(map);
+              //add layer geojson pendidikan., dont add to sidebar
+              var Pendidikan_Kab_Tangerang = new L.GeoJSON.AJAX("data/Pendidikan_Kab_Tangerang.geojson",{
+              style: function(feature){
+                //random color
+                var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+                return {color: randomColor, weight: 1, fillOpacity: 0.5}
+              },
+              onEachFeature: function(feature, layer){
+                layer.bindPopup(feature.properties.NAMOBJ);
+              }
+               }).addTo(map);
+                //add layer geojson sungai, dont add to sidebar
+            var Sungai_Kab_Tangerang = new L.GeoJSON.AJAX("data/Sungai_Kab_Tangerang.geojson",{
+              style: function(feature){
+                //random color
+                var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+                return {color: randomColor, weight: 1, fillOpacity: 0.5}
+              },
+              onEachFeature: function(feature, layer){
+                layer.bindPopup(feature.properties.NAMOBJ);
+              }
+               }).addTo(map);
+                    //add layer control
+                    var baseLayers = {
+                 "OSM": osm,
+                 "Positron": CartoDB_Positron,
+                 "Google Streets": googleStreets,
+                 "Google Satellite": googleSat
+               };
+               var overlays = {
+                 "Desa": AdmDesa_Kab_Tangerang,
+                 "Pendidikan": Pendidikan_Kab_Tangerang,
+                 "Sungai": Sungai_Kab_Tangerang
+               };
+               L.control.layers(baseLayers, overlays).addTo(map);
+               //add control search
+               var searchControl = new L.Control.Search({
+                 layer: AdmDesa_Kab_Tangerang,
+                 propertyName: 'NAMOBJ',
+                 zoom: 10,
+                 marker: false
+               });
+               map.addControl( searchControl );
+               //add control geocoder
+               var geocoder = L.Control.geocoder().addTo(map);
+            </script>
+
+</body>
+</html>
